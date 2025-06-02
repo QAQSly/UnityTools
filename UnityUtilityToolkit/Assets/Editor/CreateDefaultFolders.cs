@@ -20,10 +20,10 @@ namespace Sly
 
         private void OnGUI()
         {
-            GUILayout.Label("输入主文件夹名：", EditorStyles.boldLabel);
-            mainFolderName = EditorGUILayout.TextField("主文件夹名", mainFolderName);
+            GUILayout.Label("输入游戏主文件夹名：", EditorStyles.boldLabel);
+            mainFolderName = EditorGUILayout.TextField("游戏主文件夹名", mainFolderName);
 
-            if (GUILayout.Button("创建文件夹"))
+            if (GUILayout.Button("创建游戏默认文件夹"))
             {
                 CreateFolders(mainFolderName);
             }
