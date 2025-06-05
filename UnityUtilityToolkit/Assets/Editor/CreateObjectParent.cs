@@ -14,9 +14,10 @@ public class CreateObjectParent : EditorWindow
         if (gos == null || gos.Length == 0)
         {
             Debug.LogError("未选中物体");
+            return;
         }
 
-        GameObject parent = new GameObject("" + gos[0].name);
+        GameObject parent = new GameObject($"======{gos[0].name}======");
         foreach (var go in gos)
         {
             go.transform.SetParent(parent.transform);
