@@ -6,7 +6,7 @@ using UnityEngine;
 public class CreateObjectParent : EditorWindow
 {
     // Start is called before the first frame update
-    [MenuItem("Sly/CreateGameObjectParent")]
+    [MenuItem("SlyTools/创建选中对象父对象")]
     public static void CreateParent()
     {
         GameObject[] gos = Selection.gameObjects;
