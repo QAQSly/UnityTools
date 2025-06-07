@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+/// <summary>
+/// 创建选中对象父对象并以子对象第一个命名 父对象颜色更改
+/// </summary>
 [InitializeOnLoad]
 public class CreateObjectParent : EditorWindow
 {

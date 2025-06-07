@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace Sly
 {
+    /// <summary>
+    /// 一键创建游戏默认文件夹
+    /// </summary>
     public class CreateDefaultFolders : EditorWindow
     {
        
@@ -37,6 +40,7 @@ namespace Sly
                 $"Assets/{mainFolderName}/Scenes",
                 $"Assets/{mainFolderName}/Textures",
                 $"Assets/{mainFolderName}/Models",
+                $"Assets/{mainFolderName}/Meshes",
                 $"Assets/{mainFolderName}/Sprites",
                 $"Assets/{mainFolderName}/Scripts",
                 $"Assets/{mainFolderName}/Audio",
