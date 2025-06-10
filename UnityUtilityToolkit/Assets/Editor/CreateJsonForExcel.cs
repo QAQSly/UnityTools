@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,9 +14,19 @@ using NPOI.XSSF.UserModel;
 
 namespace Sly
 {
-    [InitializeOnLoad]
-    public class CreateJsonForExcel : EditorWindow
+    public interface ICover
     {
+        public void CoverJson();
+        
+    }
+    public abstract class CreateJsonForExcelBase: EditorWindow, ICover
+    {
+        public abstract void CoverJson();
+    }
+    [InitializeOnLoad]
+    public class CreateJsonForExcel: EditorWindow
+    {
+        private string _namespace = "Sly";
         private string _excelPath = "Assets/Excels";
         // editor 输出目录
         private string _editorPath = "Assets/Editor";
@@ -54,12 +65,29 @@ namespace Sly
 
             if (GUILayout.Button("数据表转换Json"))
             {
-                CoverJson<DataItem>();
+                // Type type =Type.GetType("Sly.DataItem");
+                // Cover c = Activator.CreateInstance(typeof(CreateJsonForExcel<>).MakeGenericType(type)) as Cover;
+                // CoverJson<DataItem>();
+                Type type = Type.GetType($"{_namespace}.{_className}");
+                if (type != null)
+                {
+                    MethodInfo method = typeof(CreateJsonForExcel).GetMethod("CoverJson",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    MethodInfo gMethod = method.MakeGenericMethod(type);
+                    gMethod.Invoke(this, null);
+                }
             }
 
             if (GUILayout.Button("数据表转换二进制"))
             {
-                CoverBinary<DataItem>();
+                Type type = Type.GetType($"{_namespace}.{_className}");
+                if (type != null)
+                {
+                    MethodInfo method = typeof(CreateJsonForExcel).GetMethod("CoverBinary",
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    MethodInfo gMethod = method.MakeGenericMethod(type);
+                    gMethod.Invoke(this, null);
+                }
             }
 
             if (GUILayout.Button("json读取测试"))
@@ -67,7 +95,8 @@ namespace Sly
                 string jsonFilePath = Path.Combine(_outputPath, $"{_sheetName}.json");
                 string json = File.ReadAllText(jsonFilePath);
                 Wrapper<DataItem> wp = JsonUtility.FromJson<Wrapper<DataItem>>(json);
-                Debug.Log($"{wp.items[0].texts[0]}");
+                DataItem item = wp.items.Find(p => p.id == 123);
+                Debug.Log($"当前item的名字 {item.name}");
             }
 
             if (GUILayout.Button("二进制读取测试"))
@@ -187,13 +216,10 @@ namespace Sly
                 Debug.Log($"创建文件夹 路径{_outputPath}");
             }
         }
-    
 
-        [Serializable]
-        public class Wrapper<T>
-        {
-            public List<T> items;
-        }
+
+       
+      
 
         void CreateClassBegin()
         {
@@ -259,7 +285,8 @@ namespace Sly
             }
             CreateClassEnd();   
         }
-       
+
+        
         List<T> ReadExcel<T>()
         {
             List<T> data = new List<T>();
@@ -379,6 +406,8 @@ namespace Sly
             }
             return data;
         }
+
+       
 
         void CoverJson<T>()
         {
