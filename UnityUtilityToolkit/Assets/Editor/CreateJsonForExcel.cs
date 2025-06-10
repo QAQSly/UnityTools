@@ -32,7 +32,9 @@ namespace Sly
         private string _editorPath = "Assets/Editor";
         // 读取工作蒲文件名
         private string _fileName = "loop文档5.28.11.xlsx";
-        // 读取工作表名
+        // 读取工作蒲表明
+        private string _fileSheetName = "属性表";
+        // 读取工作蒲名
         private string _sheetName = "属性表";
         private string _outputPath = "Assets/Jsons";
         StringBuilder sb = new StringBuilder(); 
@@ -49,7 +51,8 @@ namespace Sly
             GUILayout.Label("表格转json", EditorStyles.boldLabel);
             _excelPath = EditorGUILayout.TextField("表格路径", _excelPath);
             _fileName = EditorGUILayout.TextField("读取文件名", _fileName);
-            _sheetName = EditorGUILayout.TextField("表名", _sheetName);
+            _fileSheetName = EditorGUILayout.TextField("读取结构表表明", _fileSheetName);
+            _sheetName = EditorGUILayout.TextField("数据表名", _sheetName);
             _outputPath = EditorGUILayout.TextField("json输出路径", _outputPath);
             _className = EditorGUILayout.TextField("类名", _className);
 
@@ -95,8 +98,8 @@ namespace Sly
                 string jsonFilePath = Path.Combine(_outputPath, $"{_sheetName}.json");
                 string json = File.ReadAllText(jsonFilePath);
                 Wrapper<DataItem> wp = JsonUtility.FromJson<Wrapper<DataItem>>(json);
-                DataItem item = wp.items.Find(p => p.id == 123);
-                Debug.Log($"当前item的名字 {item.name}");
+                // DataItem item = wp.items.Find(p => p.id == 123);
+                // Debug.Log($"当前item的名字 {item.name}");
             }
 
             if (GUILayout.Button("二进制读取测试"))
@@ -106,7 +109,7 @@ namespace Sly
                 {
                     BinaryFormatter bf = new BinaryFormatter();
                     Wrapper<DataItem> wp = (Wrapper<DataItem>)bf.Deserialize(fs);
-                    Debug.Log($"{wp.items[0].id}");
+                    // Debug.Log($"{wp.items[0].id}");
                 }
                 
             }
@@ -126,10 +129,12 @@ namespace Sly
             List<string> explains = new List<string>(); 
             string filePath =  Path.Combine(_excelPath, _fileName);
             Debug.Log($"读取文件夹路径 {filePath}");
+            IWorkbook workbook = null;
             try
             {
-                IWorkbook workbook = new XSSFWorkbook(filePath);
-                ISheet sheet1 = workbook.GetSheet(_sheetName); //
+                workbook = new XSSFWorkbook(filePath);
+                ISheet sheet1 = workbook.GetSheet(_fileSheetName); //
+                Debug.Log(sheet1.SheetName);
 
                 // 遍历行
                 for (int i = 1; i <= sheet1.LastRowNum; i++)
@@ -153,56 +158,79 @@ namespace Sly
 
                     Debug.Log($"工作 {cell1?.ToString()} {cell2?.ToString()} {cell3?.ToString()}");
                 }
-                
-                
-                
+
+
+
             }
             catch (Exception e)
             {
                 Debug.LogError($"无法读取表 {e.Message}");
             }
-            var newFile = Path.Combine(_excelPath, $"{_sheetName}.xlsx"); 
-            using (var fs = new FileStream(newFile, FileMode.Create, FileAccess.Write))
+            finally
             {
-                IWorkbook newWorkbook = new XSSFWorkbook();
-                ISheet newSheet1 = newWorkbook.CreateSheet(_sheetName);
+                if (workbook != null)
+                {
+                    workbook.Close();
+                }
+            }
+            var newFile = Path.Combine(_excelPath, $"{_sheetName}.xlsx");
+            IWorkbook newWorkbook = null;
+            try
+            {
+                using (var fs = new FileStream(newFile, FileMode.Create, FileAccess.Write))
+                {
+                    newWorkbook = new XSSFWorkbook();
+                    ISheet newSheet1 = newWorkbook.CreateSheet(_sheetName);
 
                    
-                // 创建注释
-                IRow annotationRow = newSheet1.CreateRow(0);
-                for (int i = 0; i < annotations.Count; i++)
-                {
-                    annotationRow.CreateCell(i).SetCellValue(annotations[i]);
-                    newSheet1.AutoSizeColumn(i);
+                    // 创建注释
+                    IRow annotationRow = newSheet1.CreateRow(0);
+                    for (int i = 0; i < annotations.Count; i++)
+                    {
+                        annotationRow.CreateCell(i).SetCellValue(annotations[i]);
+                        newSheet1.AutoSizeColumn(i);
+                    }
+                    // 创建字段
+                    IRow fieldRow = newSheet1.CreateRow(1);
+
+                    for (int i = 0; i < fields.Count; i++)
+                    {
+                        fieldRow.CreateCell(i).SetCellValue(fields[i]);
+                        newSheet1.AutoSizeColumn(i);
+                    }
+                    // 创建数据类型
+                    IRow dataTypeRow = newSheet1.CreateRow(2);
+                    for (int i = 0; i < dataTypes.Count; i++)
+                    {
+                        dataTypeRow.CreateCell(i).SetCellValue(dataTypes[i]);
+                        newSheet1.AutoSizeColumn(i);
+                    }
+
+                    IRow explainsRow = newSheet1.CreateRow(3);
+                    for (int i = 0; i < explains.Count; i++)
+                    {
+                        explainsRow.CreateCell(i).SetCellValue(explains[i]);
+                        newSheet1.AutoSizeColumn(i);
+                    }
+
+                    // 写入文件
+                    newWorkbook.Write(fs);
                 }
-                // 创建字段
-                IRow fieldRow = newSheet1.CreateRow(1);
-
-                for (int i = 0; i < fields.Count; i++)
-                {
-                    fieldRow.CreateCell(i).SetCellValue(fields[i]);
-                    newSheet1.AutoSizeColumn(i);
-                }
-                // 创建数据类型
-                IRow dataTypeRow = newSheet1.CreateRow(2);
-                for (int i = 0; i < dataTypes.Count; i++)
-                {
-                    dataTypeRow.CreateCell(i).SetCellValue(dataTypes[i]);
-                    newSheet1.AutoSizeColumn(i);
-                }
-
-                IRow explainsRow = newSheet1.CreateRow(3);
-                for (int i = 0; i < explains.Count; i++)
-                {
-                    explainsRow.CreateCell(i).SetCellValue(explains[i]);
-                    newSheet1.AutoSizeColumn(i);
-                }
-
-                // 写入文件
-                newWorkbook.Write(fs);
-
-
             }
+            catch (Exception e)
+            {
+                Debug.LogError("无法创建新表");
+            }
+            finally
+            {
+                if (newWorkbook != null)
+                {
+                    newWorkbook.Close();
+                }
+            }
+
+          
+            AssetDatabase.Refresh();
             Debug.Log($"新文件已生成：{newFile}");
             
         }
@@ -239,7 +267,9 @@ namespace Sly
             sb.Append("\n}");
             string classPath = Path.Combine(_editorPath, $"{_className}.cs");
             File.WriteAllText(classPath ,sb.ToString());
-            Debug.Log("类创建完成"); 
+            Debug.Log("类创建完成");
+            sb.Clear();
+            AssetDatabase.Refresh();
         }
         
         void CreateClass(string an, string type, string field)
@@ -251,11 +281,12 @@ namespace Sly
         void ReadExcelToClass()
         {
              string filePath =  Path.Combine(_excelPath, $"{_sheetName}.xlsx");
+             IWorkbook workbook = null;
             Debug.Log($"读取文件夹路径 {filePath}");
             CreateClassBegin();
             try
             {
-                IWorkbook workbook = new XSSFWorkbook(filePath);
+                workbook =  new XSSFWorkbook(filePath);
                 ISheet sheet1 = workbook.GetSheetAt(0); // 获取到第一个工作表
                 Debug.Log($"工作蒲名称 {workbook.NumberOfSheets} 工作表 {sheet1.SheetName}");
 
@@ -282,6 +313,13 @@ namespace Sly
             catch (Exception e)
             {
                 Debug.LogError($"类创建失败 {e.Message}");
+            }
+            finally
+            {
+                if (workbook != null)
+                {
+                    workbook.Close();
+                }
             }
             CreateClassEnd();   
         }
@@ -399,6 +437,7 @@ namespace Sly
                     }
                    
                 }
+                workbook.Close();
             }
             catch (Exception e)
             {
@@ -427,6 +466,7 @@ namespace Sly
             string json = JsonUtility.ToJson(wrapper, true);
             string jsonFilePath = Path.Combine(_outputPath, $"{_sheetName}.json");
             File.WriteAllText(jsonFilePath, json);
+            AssetDatabase.Refresh();
             Debug.Log($"JSON 文件已生成：{jsonFilePath}");
         }
 
@@ -447,7 +487,7 @@ namespace Sly
                 bf.Serialize(fs, wp);
             }
             // 将数据转换为 JSO
-            
+            AssetDatabase.Refresh();
             Debug.Log($"二进制 文件已生成：{binaryFilePath}"); 
         }
     }

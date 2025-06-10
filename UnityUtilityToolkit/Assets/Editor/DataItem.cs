@@ -16,5 +16,4 @@ namespace Sly
 		//道具文本（描述、信息、解锁方法）
 		public List<String> texts;
 	}
-	
 }
