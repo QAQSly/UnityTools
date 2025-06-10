@@ -8,6 +8,7 @@ namespace Sly
     /// <summary>
     /// 一键创建游戏默认文件夹
     /// </summary>
+    [InitializeOnLoad]
     public class CreateDefaultFolders : EditorWindow
     {
        
@@ -43,11 +44,14 @@ namespace Sly
                 $"Assets/{mainFolderName}/Meshes",
                 $"Assets/{mainFolderName}/Sprites",
                 $"Assets/{mainFolderName}/Scripts",
+                $"Assets/{mainFolderName}/Shaders",
                 $"Assets/{mainFolderName}/Audio",
                 $"Assets/{mainFolderName}/Fonts",
                 $"Assets/{mainFolderName}/Materials",
                 $"Assets/{mainFolderName}/Animations",
                 $"Assets/{mainFolderName}/Prefabs",
+                $"Assets/{mainFolderName}/Jsons",
+                $"Assets/{mainFolderName}/Excels",
                 "Assets/Resources",
                 "Assets/Plugins",
                 "Assets/Plugins/Editor",

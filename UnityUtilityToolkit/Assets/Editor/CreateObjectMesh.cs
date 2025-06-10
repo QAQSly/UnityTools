@@ -7,7 +7,8 @@ namespace Sly
     /// <summary>
     /// 合并对象mesh 使用时需要配合创建父对象使用
     /// </summary>
-    public class CreateObjectMesh : EditorWindow
+    [InitializeOnLoad]
+    public class CreateObjectMesh
     {
         // 选中所有对象
         [MenuItem("SlyTools/合并子对象mesh")]
