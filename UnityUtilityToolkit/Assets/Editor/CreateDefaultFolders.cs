@@ -52,6 +52,7 @@ namespace Sly
                 $"Assets/{mainFolderName}/Prefabs",
                 $"Assets/{mainFolderName}/Jsons",
                 $"Assets/{mainFolderName}/Excels",
+                $"Assets/{mainFolderName}/Plugins",
                 "Assets/Resources",
                 "Assets/Plugins",
                 "Assets/Plugins/Editor",
